@@ -56,6 +56,7 @@ if __name__ == "__main__":
         show_tensor_image(img)
         if idx == T - stepsize:
             last_img = img
+    plt.savefig("forward_nosing.png")
     plt.show()
 
     # 在循环结束后单独保存最后一张图像
@@ -63,4 +64,4 @@ if __name__ == "__main__":
     show_tensor_image(last_img)
     plt.axis("off")
     plt.savefig("noising_last_image.png")
-    plt.show()
+    # plt.show()

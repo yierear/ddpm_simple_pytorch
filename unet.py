@@ -2,7 +2,7 @@ from torch import nn
 import torch
 import math
 
-from diffusion_model_try.dataloader import show_tensor_image
+from dataloader import show_tensor_image
 
 
 class Block(nn.Module):
@@ -97,4 +97,4 @@ if __name__ == "__main__":
     t = torch.randint(0, 10, (1,), device=device)
     output = model(img, t)
 
-    show_tensor_image(output.detach().cpu(), is_show=True)
+    # show_tensor_image(output.detach().cpu(), is_show=True)

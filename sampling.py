@@ -1,5 +1,7 @@
 import torch
 import torch.nn.functional as F
+from PIL import Image
+from torchvision import transforms
 from forward_noising import (
     T,
     betas,
@@ -44,8 +46,27 @@ def sample_timestep(model, x, t):
 
 @torch.no_grad()
 def sample_plot_image(model, device, img_size, T):
-    # 随机生成噪声图片
-    img = torch.randn((1, 3, img_size, img_size), device=device)
+    # # 随机生成噪声图片
+    # img = torch.randn((1, 3, img_size, img_size), device=device)
+
+    # 使用真实图片
+    img = plt.imread("noising_last_image.png")
+    plt.imshow(img)
+    plt.show()
+    data_transforms = transforms.Compose(
+        [
+            transforms.ToPILImage(),  # numpy --> PIL
+            transforms.Resize((img_size, img_size)),
+            transforms.ToTensor(),
+            transforms.Lambda(lambda t: (t * 2) - 1),
+        ]
+    )
+    img = data_transforms(img).unsqueeze(0).to(device)
+    if img.shape[1] == 4:  # 检查是否有透明通道
+        img = img[:, :3, :, :]  # 保留前三个通道
+
+    show_tensor_image(img, is_show=True)
+
     plt.figure(figsize=(15, 15))
     plt.axis("off")
     num_images = 10
@@ -58,7 +79,7 @@ def sample_plot_image(model, device, img_size, T):
         img = torch.clamp(img, -1.0, 1.0)  # 本来就标准化到【-1， 1】了
         if i % stepsize == 0:
             plt.subplot(1, num_images, int(num_images - i / stepsize))
-            show_tensor_image(img.detach().cpu())
+            show_tensor_image(img.detach().cpu(), is_show=True)
     plt.savefig("sample.png")
 
 
@@ -68,6 +89,6 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     # 加载预训练模型
-    # model.load_state_dict(torch.load(""))
+    model.load_state_dict(torch.load("pretrain_models/ddpm_mse_epochs_10.pth"))
     model.to(device)
     sample_plot_image(model=model, device=device, img_size=img_size, T=T)
